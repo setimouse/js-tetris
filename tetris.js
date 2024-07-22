@@ -3,7 +3,7 @@ let ctx = canvas.getContext('2d');
 
  // canvas size
 let { width: c_width, height: c_height } = canvas.getBoundingClientRect();
-const COL = 12;
+const COL = 10;
 const b_size = c_width / COL; // block size
 const line_count = Math.floor(c_height / b_size); // line count
 let gameOver = false;
@@ -31,7 +31,7 @@ function collided(mino) {
 
 // stick tetromino into space
 function stick(tetromino) {
-  const full_line = new Array(COL).fill(1).reduce((a, b) => a << 1 | b)
+  const full_line = (1 << COL) - 1
   for (let i = 0; i < space.length; i++) {
     space[i] |= tetromino[i];
     if (space[i] === full_line) {
@@ -159,6 +159,10 @@ function render() {
   requestAnimationFrame(render);
 }
 
+const bgColor = 'rgb(158, 173, 134)';
+const bgBlock = 'rgba(0,0,0,.854)';
+const fgBlock = 'rgba(0,0,0,.146)';
+
 render();
 
 function renderGameover() {
@@ -172,33 +176,40 @@ function renderGameover() {
   ctx.restore();
 }
 
+function renderBox(x, y) {
+  const padding = 2, innerPadding = 5;
+  ctx.strokeRect(x * b_size + padding, y * b_size + padding, b_size - padding * 2, b_size - padding * 2);
+  ctx.fillRect(x * b_size + innerPadding, y * b_size + innerPadding, b_size - innerPadding * 2, b_size - innerPadding * 2);
+}
+
 function renderSpace() {
-  ctx.save();
-  ctx.strokeStyle = 'rgb(192, 192, 192)';
-  ctx.fillStyle = 'rgba(255,255,255,1)'
+  ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, c_width, c_height);
   for (let y = 0; y < space.length; y++) {
     for (let x = 0; x < COL; x++) {
+      ctx.save();
       if (space[y] >> (COL - x - 1) & 1 > 0) {
-        ctx.save();
-        ctx.fillStyle = 'rgb(0,0,0)'
-        ctx.fillRect(x * b_size, y * b_size, b_size, b_size);
-        ctx.restore();
+        ctx.fillStyle = bgBlock;
+        ctx.strokeStyle = bgBlock;
+        renderBox(x, y);
+      } else {
+        ctx.strokeStyle = fgBlock;
+        ctx.fillStyle = fgBlock;
+        renderBox(x, y);
       }
-      ctx.strokeRect(x * b_size, y * b_size, b_size, b_size);
+      ctx.restore();
     }
   }
-  ctx.restore();
 }
 
 function renderTetromino(tetromino) {
   ctx.save();
-  ctx.strokeStyle = 'rgb(192, 192, 192)';
-  ctx.fillStyle = 'rgb(0, 0, 0)'
+  ctx.strokeStyle = bgBlock;
+  ctx.fillStyle = bgBlock;
   for (let y = 0; y < tetromino.mino.length; y++) {
     for (let x = 0; x < COL; x++) {
       if ((1 << x) & tetromino.mino[y])
-        ctx.fillRect((COL - x - 1) * b_size, y * b_size, b_size, b_size);
+        renderBox(COL - x - 1, y);
     }
   }
   ctx.restore();
