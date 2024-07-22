@@ -124,6 +124,13 @@ class Tetromino {
     return this;
   }
 
+  drop() {
+    while (this._canDown()) {
+      this.down();
+    }
+    t.down();
+  }
+
   rotate() {
     const size = this.tetromino.length;
     let t = Array(size).fill(0);
@@ -161,7 +168,7 @@ function render() {
 
 const bgColor = 'rgb(158, 173, 134)';
 const bgBlock = 'rgba(0,0,0,.854)';
-const fgBlock = 'rgba(0,0,0,.146)';
+const fgBlock = 'rgba(0,0,0,.09)';
 
 render();
 
@@ -187,16 +194,11 @@ function renderSpace() {
   ctx.fillRect(0, 0, c_width, c_height);
   for (let y = 0; y < space.length; y++) {
     for (let x = 0; x < COL; x++) {
+      const b = space[y] >> (COL - x - 1) & 1 > 0
       ctx.save();
-      if (space[y] >> (COL - x - 1) & 1 > 0) {
-        ctx.fillStyle = bgBlock;
-        ctx.strokeStyle = bgBlock;
-        renderBox(x, y);
-      } else {
-        ctx.strokeStyle = fgBlock;
-        ctx.fillStyle = fgBlock;
-        renderBox(x, y);
-      }
+      ctx.fillStyle = b? bgBlock : fgBlock;
+      ctx.strokeStyle = b ? bgBlock : fgBlock;
+      renderBox(x, y);
       ctx.restore();
     }
   }
@@ -235,6 +237,9 @@ window.addEventListener('keydown', (e) => {
       break;
     case 'ArrowUp':
       t.rotate();
+      break;
+    case ' ':
+      t.drop();
       break;
   }
 });
