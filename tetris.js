@@ -108,7 +108,7 @@ class Tetromino {
       return this;
     }
     this.mino = mino;
-    this.x++;
+    this.x = Math.min(this.x + 1, COL);
     return this;
   }
 
@@ -144,13 +144,20 @@ class Tetromino {
     while (t[0] === 0) {
       t = [...t.slice(1, t.length), 0]
     }
+    console.log(t, this.x);
+    // 小细节
+    if (this.x < COL / 2) {
+      while (t.reduce((a, b) => a | b) >> (size - 1) === 0) {
+        console.log(t);
+        t = t.map(e => e << 1);
+      }
+    }
     return t;
   }
 
   _canRotate() {
     const rotated = this._rotateTetromino();
     const size = rotated.length;
-    console.log("size:", size, "x:", this.x)
     if (size < this.x) return rotated;
     const mino = [
       ...new Array(this.y).fill(0),
