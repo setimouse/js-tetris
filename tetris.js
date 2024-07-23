@@ -131,7 +131,7 @@ class Tetromino {
     t.down();
   }
 
-  rotate() {
+  _rotateTetromino() {
     const size = this.tetromino.length;
     let t = Array(size).fill(0);
     for (let i = 0; i < size; i++) {
@@ -144,7 +144,32 @@ class Tetromino {
     while (t[0] === 0) {
       t = [...t.slice(1, t.length), 0]
     }
-    this.tetromino = [...t];
+    return t;
+  }
+
+  _canRotate() {
+    const rotated = this._rotateTetromino();
+    const size = rotated.length;
+    console.log("size:", size, "x:", this.x)
+    if (size < this.x) return rotated;
+    const mino = [
+      ...new Array(this.y).fill(0),
+      ...rotated.map(e => e << (COL - size)),
+      ...new Array(line_count - this.y - size).fill(0),
+    ];
+    if (collided(mino)) {
+      return false;
+    }
+    this.x = size;
+    return rotated;
+  }
+
+  rotate() {
+    const rotated = this._canRotate();
+    if (false === rotated) {
+      return this;
+    }
+    this.tetromino = [...rotated];
     this._put();
     return this;
   }
